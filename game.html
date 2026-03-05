@@ -1,0 +1,147 @@
+<!-- game.html - Multiplayer Mode -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo Game - Multiplayer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-wrapper">
+        <div class="game-container">
+            <!-- Back Button -->
+            <div style="position: absolute; top: -80px; left: 0; z-index: 100;">
+                <button onclick="goHome()" style="
+                    padding: 12px 25px;
+                    font-size: 16px;
+                    background: linear-gradient(145deg, #8B4513, #A0522D);
+                    color: #FFD700;
+                    border: 3px solid #FFD700;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    font-family: 'Arial Black', Arial, sans-serif;
+                    font-weight: bold;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                    transition: all 0.3s;
+                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">← BACK TO HOME</button>
+            </div>
+
+            <div class="turn-indicator" id="turnIndicator">Red's Turn</div>
+            
+            <div class="board" id="board">
+                <!-- Red Home (Top Left) -->
+                <div class="home-area home-red">
+                    <div class="player-label label-red">RED</div>
+                    <div class="home-inner" id="redHome">
+                        <div class="home-slot" data-color="red" data-index="0"><div class="pawn pawn-red" id="red-0"></div></div>
+                        <div class="home-slot" data-color="red" data-index="1"><div class="pawn pawn-red" id="red-1"></div></div>
+                        <div class="home-slot" data-color="red" data-index="2"><div class="pawn pawn-red" id="red-2"></div></div>
+                        <div class="home-slot" data-color="red" data-index="3"><div class="pawn pawn-red" id="red-3"></div></div>
+                    </div>
+                </div>
+
+                <!-- Blue Home (Top Right) -->
+                <div class="home-area home-blue">
+                    <div class="player-label label-blue">BLUE</div>
+                    <div class="home-inner" id="blueHome">
+                        <div class="home-slot" data-color="blue" data-index="0"><div class="pawn pawn-blue" id="blue-0"></div></div>
+                        <div class="home-slot" data-color="blue" data-index="1"><div class="pawn pawn-blue" id="blue-1"></div></div>
+                        <div class="home-slot" data-color="blue" data-index="2"><div class="pawn pawn-blue" id="blue-2"></div></div>
+                        <div class="home-slot" data-color="blue" data-index="3"><div class="pawn pawn-blue" id="blue-3"></div></div>
+                    </div>
+                </div>
+
+                <!-- Yellow Home (Bottom Left) -->
+                <div class="home-area home-yellow">
+                    <div class="player-label label-yellow">YELLOW</div>
+                    <div class="home-inner" id="yellowHome">
+                        <div class="home-slot" data-color="yellow" data-index="0"><div class="pawn pawn-yellow" id="yellow-0"></div></div>
+                        <div class="home-slot" data-color="yellow" data-index="1"><div class="pawn pawn-yellow" id="yellow-1"></div></div>
+                        <div class="home-slot" data-color="yellow" data-index="2"><div class="pawn pawn-yellow" id="yellow-2"></div></div>
+                        <div class="home-slot" data-color="yellow" data-index="3"><div class="pawn pawn-yellow" id="yellow-3"></div></div>
+                    </div>
+                </div>
+
+                <!-- Green Home (Bottom Right) -->
+                <div class="home-area home-green">
+                    <div class="player-label label-green">GREEN</div>
+                    <div class="home-inner" id="greenHome">
+                        <div class="home-slot" data-color="green" data-index="0"><div class="pawn pawn-green" id="green-0"></div></div>
+                        <div class="home-slot" data-color="green" data-index="1"><div class="pawn pawn-green" id="green-1"></div></div>
+                        <div class="home-slot" data-color="green" data-index="2"><div class="pawn pawn-green" id="green-2"></div></div>
+                        <div class="home-slot" data-color="green" data-index="3"><div class="pawn pawn-green" id="green-3"></div></div>
+                    </div>
+                </div>
+
+                <!-- Center Star Area -->
+                <div class="center-star">
+                    <div class="triangle triangle-red"></div>
+                    <div class="triangle triangle-blue"></div>
+                    <div class="triangle triangle-green"></div>
+                    <div class="triangle triangle-yellow"></div>
+                    <div class="center-cross"></div>
+                </div>
+
+                <!-- Path cells will be generated by JavaScript -->
+            </div>
+
+            <!-- Controls Section - Outside the board -->
+            <div class="controls-section">
+                <div class="controls">
+                    <div class="dice-wrapper">
+                        <div class="dice-container" id="diceContainer">
+                            <div class="dice" id="dice">
+                                <div class="dice-face face-1" style="display: grid;">
+                                    <div class="dot" style="grid-column: 2; grid-row: 2;"></div>
+                                </div>
+                                <div class="dice-face face-2" style="display: none;">
+                                    <div class="dot" style="grid-column: 1; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 3;"></div>
+                                </div>
+                                <div class="dice-face face-3" style="display: none;">
+                                    <div class="dot" style="grid-column: 1; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 2; grid-row: 2;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 3;"></div>
+                                </div>
+                                <div class="dice-face face-4" style="display: none;">
+                                    <div class="dot" style="grid-column: 1; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 1; grid-row: 3;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 3;"></div>
+                                </div>
+                                <div class="dice-face face-5" style="display: none;">
+                                    <div class="dot" style="grid-column: 1; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 2; grid-row: 2;"></div>
+                                    <div class="dot" style="grid-column: 1; grid-row: 3;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 3;"></div>
+                                </div>
+                                <div class="dice-face face-6" style="display: none;">
+                                    <div class="dot" style="grid-column: 1; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 1; grid-row: 2;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 2;"></div>
+                                    <div class="dot" style="grid-column: 1; grid-row: 3;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 3;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="roll-btn" id="rollBtn" onclick="rollDice()">ROLL DICE</button>
+                </div>
+
+                <div class="game-info" id="gameInfo">Roll a 6 to move a pawn from home!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

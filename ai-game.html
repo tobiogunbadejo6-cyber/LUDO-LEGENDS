@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo Legends - Vs AI</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+            font-family: 'Arial Black', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .ai-setup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .setup-panel {
+            background: linear-gradient(145deg, #FFD700, #FFA500);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 4px solid #8B4513;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .setup-panel h2 {
+            color: #8B4513;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-shadow: 2px 2px 0 rgba(255,255,255,0.3);
+        }
+
+        .color-select {
+            margin-bottom: 30px;
+        }
+
+        .color-select h3 {
+            color: #5D3A1A;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .color-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 4px solid white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.selected {
+            border-color: #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            transform: scale(1.15);
+        }
+
+        .color-red { background: #DC143C; }
+        .color-blue { background: #1E90FF; }
+        .color-green { background: #32CD32; }
+        .color-yellow { background: #FFD700; }
+
+        .difficulty-select {
+            margin-bottom: 30px;
+        }
+
+        .difficulty-select h3 {
+            color: #5D3A1A;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .difficulty-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .diff-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            border: 2px solid #8B4513;
+            background: white;
+            color: #8B4513;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Arial Black', Arial, sans-serif;
+            transition: all 0.3s;
+        }
+
+        .diff-btn:hover, .diff-btn.selected {
+            background: #8B4513;
+            color: #FFD700;
+        }
+
+        .start-game-btn {
+            padding: 15px 50px;
+            font-size: 24px;
+            background: linear-gradient(145deg, #32CD32, #228B22);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Arial Black', Arial, sans-serif;
+            box-shadow: 0 8px 0 #006400;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            transition: all 0.1s;
+        }
+
+        .start-game-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .start-game-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 0 #006400;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background: #8B4513;
+            color: #FFD700;
+            border: 3px solid #FFD700;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .game-wrapper {
+            display: none;
+        }
+
+        .game-wrapper.active {
+            display: block;
+        }
+
+        .ai-indicator {
+            display: inline-block;
+            background: #333;
+            color: #0f0;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-left: 10px;
+            animation: pulse 1s infinite;
+            font-family: Arial, sans-serif;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Game container styles */
+        .game-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .turn-indicator {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: background 0.3s;
+            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .board {
+            width: 600px;
+            height: 600px;
+            background: #FFF8DC;
+            border: 8px solid #8B4513;
+            border-radius: 10px;
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            grid-template-rows: repeat(15, 1fr);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .home-area {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            margin: 3px;
+        }
+
+        .home-red {
+            grid-column: 1 / 7;
+            grid-row: 1 / 7;
+            background: linear-gradient(145deg, #DC143C, #B22222);
+            border: 4px solid #8B0000;
+        }
+
+        .home-blue {
+            grid-column: 9 / 16;
+            grid-row: 1 / 7;
+            background: linear-gradient(145deg, #1E90FF, #0066CC);
+            border: 4px solid #00008B;
+        }
+
+        .home-yellow {
+            grid-column: 1 / 7;
+            grid-row: 9 / 16;
+            background: linear-gradient(145deg, #FFD700, #FFA500);
+            border: 4px solid #B8860B;
+        }
+
+        .home-green {
+            grid-column: 9 / 16;
+            grid-row: 9 / 16;
+            background: linear-gradient(145deg, #32CD32, #228B22);
+            border: 4px solid #006400;
+        }
+
+        .player-label {
+            position: absolute;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+        }
+
+        .label-red { top: 10px; left: 12px; }
+        .label-blue { top: 10px; right: 12px; }
+        .label-yellow { bottom: 10px; left: 12px; }
+        .label-green { bottom: 10px; right: 12px; }
+
+        .home-inner {
+            width: 70%;
+            height: 70%;
+            background: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+            padding: 10px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2), 0 2px 5px rgba(255,255,255,0.3);
+        }
+
+        .home-slot {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.05);
+            border-radius: 8px;
+            border: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .center-star {
+            grid-column: 7 / 9;
+            grid-row: 7 / 9;
+            position: relative;
+            overflow: hidden;
+            background: #FFF8DC;
+        }
+
+        .triangle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .triangle-red {
+            bottom: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 0 40px 40px 40px;
+            border-color: transparent transparent #DC143C transparent;
+        }
+
+        .triangle-blue {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 40px 40px 0 40px;
+            border-color: #1E90FF transparent transparent transparent;
+        }
+
+        .triangle-green {
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            border-width: 40px 0 40px 40px;
+            border-color: transparent transparent transparent #32CD32;
+        }
+
+        .triangle-yellow {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 0 40px 40px 40px;
+            border-color: transparent transparent #FFD700 transparent;
+        }
+
+        .center-cross {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: white;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            padding: 10px;
+        }
+
+        .dice-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dice-container {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 -5px 10px rgba(0,0,0,0.1);
+            border: 3px solid #8B4513;
+        }
+
+        .dice {
+            width: 60px;
+            height: 60px;
+            position: relative;
+        }
+
+        .dice-face {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            padding: 5px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #333;
+            border-radius: 50%;
+            align-self: center;
+            justify-self: center;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .roll-btn {
+            padding: 20px 50px;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(145deg, #32CD32, #228B22);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #006400, 0 15px 20px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.1s;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-family: 'Arial Black', Arial, sans-serif;
+        }
+
+        .roll-btn:hover {
+            background: linear-gradient(145deg, #3DD83D, #2E9E2E);
+            transform: translateY(-2px);
+        }
+
+        .roll-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 0 #006400, 0 5px 10px rgba(0,0,0,0.3);
+        }
+
+        .roll-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 8px 0 #006400;
+        }
+
+        .game-info {
+            padding: 15px 30px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 400px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .top-bar {
+            position: absolute;
+            top: -80px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (max-width: 700px) {
+            .board {
+                width: 350px;
+                height: 350px;
+            }
+            .setup-panel {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- AI Setup Screen -->
+    <div class="ai-setup" id="aiSetup">
+        <div class="setup-panel">
+            <h2>🤖 Play vs AI</h2>
+            
+            <div class="color-select">
+                <h3>Choose Your Color:</h3>
+                <div class="color-options">
+                    <div class="color-btn color-red selected" onclick="selectColor('red')" data-color="red"></div>
+                    <div class="color-btn color-blue" onclick="selectColor('blue')" data-color="blue"></div>
+                    <div class="color-btn color-green" onclick="selectColor('green')" data-color="green"></div>
+                    <div class="color-btn color-yellow" onclick="selectColor('yellow')" data-color="yellow"></div>
+                </div>
+            </div>
+
+            <div class="difficulty-select">
+                <h3>AI Difficulty:</h3>
+                <div class="difficulty-options">
+                    <button class="diff-btn selected" onclick="selectDifficulty('easy')" data-diff="easy">Easy</button>
+                    <button class="diff-btn" onclick="selectDifficulty('medium')" data-diff="medium">Medium</button>
+                    <button class="diff-btn" onclick="selectDifficulty('hard')" data-diff="hard">Hard</button>
+                </div>
+            </div>
+
+            <button class="start-game-btn" onclick="startAIGame()">Start Game</button>
+            <br>
+            <button class="back-btn" onclick="goHome()">← Back to Home</button>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-wrapper" id="gameWrapper">
+        <div class="game-container">
+            <!-- Top Bar with Back Button -->
+            <div class="top-bar">
+                <button class="back-btn" onclick="goHome()">← BACK TO HOME</button>
+            </div>
+
+            <div class="turn-indicator" id="turnIndicator">Red's Turn</div>
+            
+            <div class="board" id="board">
+                <!-- Red Home -->
+                <div class="home-area home-red">
+                    <div class="player-label label-red">RED <span class="ai-indicator hidden" id="ai-red">AI</span></div>
+                    <div class="home-inner" id="redHome">
+                        <div class="home-slot" id="red-slot-0"><div class="pawn pawn-red" id="red-0"></div></div>
+                        <div class="home-slot" id="red-slot-1"><div class="pawn pawn-red" id="red-1"></div></div>
+                        <div class="home-slot" id="red-slot-2"><div class="pawn pawn-red" id="red-2"></div></div>
+                        <div class="home-slot" id="red-slot-3"><div class="pawn pawn-red" id="red-3"></div></div>
+                    </div>
+                </div>
+
+                <!-- Blue Home -->
+                <div class="home-area home-blue">
+                    <div class="player-label label-blue">BLUE <span class="ai-indicator hidden" id="ai-blue">AI</span></div>
+                    <div class="home-inner" id="blueHome">
+                        <div class="home-slot" id="blue-slot-0"><div class="pawn pawn-blue" id="blue-0"></div></div>
+                        <div class="home-slot" id="blue-slot-1"><div class="pawn pawn-blue" id="blue-1"></div></div>
+                        <div class="home-slot" id="blue-slot-2"><div class="pawn pawn-blue" id="blue-2"></div></div>
+                        <div class="home-slot" id="blue-slot-3"><div class="pawn pawn-blue" id="blue-3"></div></div>
+                    </div>
+                </div>
+
+                <!-- Yellow Home -->
+                <div class="home-area home-yellow">
+                    <div class="player-label label-yellow">YELLOW <span class="ai-indicator hidden" id="ai-yellow">AI</span></div>
+                    <div class="home-inner" id="yellowHome">
+                        <div class="home-slot" id="yellow-slot-0"><div class="pawn pawn-yellow" id="yellow-0"></div></div>
+                        <div class="home-slot" id="yellow-slot-1"><div class="pawn pawn-yellow" id="yellow-1"></div></div>
+                        <div class="home-slot" id="yellow-slot-2"><div class="pawn pawn-yellow" id="yellow-2"></div></div>
+                        <div class="home-slot" id="yellow-slot-3"><div class="pawn pawn-yellow" id="yellow-3"></div></div>
+                    </div>
+                </div>
+
+                <!-- Green Home -->
+                <div class="home-area home-green">
+                    <div class="player-label label-green">GREEN <span class="ai-indicator hidden" id="ai-green">AI</span></div>
+                    <div class="home-inner" id="greenHome">
+                        <div class="home-slot" id="green-slot-0"><div class="pawn pawn-green" id="green-0"></div></div>
+                        <div class="home-slot" id="green-slot-1"><div class="pawn pawn-green" id="green-1"></div></div>
+                        <div class="home-slot" id="green-slot-2"><div class="pawn pawn-green" id="green-2"></div></div>
+                        <div class="home-slot" id="green-slot-3"><div class="pawn pawn-green" id="green-3"></div></div>
+                    </div>
+                </div>
+
+                <!-- Center Star -->
+                <div class="center-star">
+                    <div class="triangle triangle-red"></div>
+                    <div class="triangle triangle-blue"></div>
+                    <div class="triangle triangle-green"></div>
+                    <div class="triangle triangle-yellow"></div>
+                    <div class="center-cross"></div>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <div class="controls">
+                    <div class="dice-wrapper">
+                        <div class="dice-container" id="diceContainer">
+                            <div class="dice" id="dice">
+                                <div class="dice-face face-1" style="display: grid;">
+                                    <div class="dot" style="grid-column: 2; grid-row: 2;"></div>
+                                </div>
+                                <div class="dice-face face-2" style="display: none;">
+                                    <div class="dot" style="grid-column: 1; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 3;"></div>
+                                </div>
+                                <div class="dice-face face-3" style="display: none;">
+                                    <div class="dot" style="grid-column: 1; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 2; grid-row: 2;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 3;"></div>
+                                </div>
+                                <div class="dice-face face-4" style="display: none;">
+                                    <div class="dot" style="grid-column: 1; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 1; grid-row: 3;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 3;"></div>
+                                </div>
+                                <div class="dice-face face-5" style="display: none;">
+                                    <div class="dot" style="grid-column: 1; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 2; grid-row: 2;"></div>
+                                    <div class="dot" style="grid-column: 1; grid-row: 3;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 3;"></div>
+                                </div>
+                                <div class="dice-face face-6" style="display: none;">
+                                    <div class="dot" style="grid-column: 1; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 1;"></div>
+                                    <div class="dot" style="grid-column: 1; grid-row: 2;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 2;"></div>
+                                    <div class="dot" style="grid-column: 1; grid-row: 3;"></div>
+                                    <div class="dot" style="grid-column: 3; grid-row: 3;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="roll-btn" id="rollBtn" onclick="rollDice()">ROLL DICE</button>
+                </div>
+
+                <div class="game-info" id="gameInfo">Roll a 6 to move a pawn from home!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Setup functions
+        let playerColor = 'red';
+        let aiDifficulty = 'easy';
+        let aiPlayers = [];
+
+        function selectColor(color) {
+            playerColor = color;
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`[data-color="${color}"]`).classList.add('selected');
+        }
+
+        function selectDifficulty(diff) {
+            aiDifficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`[data-diff="${diff}"]`).classList.add('selected');
+        }
+
+        function startAIGame() {
+            const allColors = ['red', 'blue', 'green', 'yellow'];
+            aiPlayers = allColors.filter(c => c !== playerColor);
+            
+            aiPlayers.forEach(color => {
+                document.getElementById(`ai-${color}`).classList.remove('hidden');
+            });
+            
+            document.getElementById('aiSetup').style.display = 'none';
+            document.getElementById('gameWrapper').classList.add('active');
+            
+            // Initialize game after a short delay
+            setTimeout(() => {
+                if(typeof initBoard === 'function') {
+                    initBoard();
+                }
+            }, 100);
+        }
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+    </script>
+    <script src="script.js"></script>
+    <script src="ai-script.js"></script>
+</body>
+</html>
